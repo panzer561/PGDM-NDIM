@@ -4,9 +4,10 @@
 
 import streamlit as st
 import pandas as pd
-from datetime import date, timedelta
 
-# ── Page config ──────────────────────────────────────────────
+# ── Config ───────────────────────────────────────────────────
+SHEET_URL = "https://docs.google.com/spreadsheets/d/1MUynpz5LOdHVTsMSK5V4aP8bTCGLHRSy02peJn6XXbk/export?format=csv"
+
 st.set_page_config(
     page_title="Student Academic Portal",
     page_icon="🎓",
@@ -17,13 +18,9 @@ st.set_page_config(
 # ── Global CSS ───────────────────────────────────────────────
 st.markdown("""
 <style>
-/* Base */
 html, body, [class*="css"] { font-family: 'Segoe UI', sans-serif; }
-
-/* Hide default Streamlit chrome */
 #MainMenu, footer { visibility: hidden; }
 
-/* Hero banner */
 .hero {
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
     border-radius: 16px;
@@ -35,7 +32,6 @@ html, body, [class*="css"] { font-family: 'Segoe UI', sans-serif; }
 .hero h1 { font-size: 2.8rem; font-weight: 800; margin: 0 0 .5rem; letter-spacing: -1px; }
 .hero p  { font-size: 1.1rem; color: #a8b2d8; margin: 0; }
 
-/* USP cards */
 .usp-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -52,7 +48,6 @@ html, body, [class*="css"] { font-family: 'Segoe UI', sans-serif; }
 .usp-card .icon { font-size: 1.8rem; }
 .usp-card p { margin: .4rem 0 0; font-size: .88rem; color: #444; font-weight: 500; }
 
-/* Section headings */
 .section-label {
     font-size: .75rem;
     font-weight: 700;
@@ -62,10 +57,6 @@ html, body, [class*="css"] { font-family: 'Segoe UI', sans-serif; }
     margin-bottom: .3rem;
 }
 
-/* Timetable button */
-.tt-wrapper { text-align: right; margin-top: .5rem; }
-
-/* Filter summary pill */
 .filter-pill {
     display: inline-block;
     background: #eef2ff;
@@ -77,7 +68,6 @@ html, body, [class*="css"] { font-family: 'Segoe UI', sans-serif; }
     margin: .2rem .2rem 0 0;
 }
 
-/* Dashboard metric card override */
 [data-testid="metric-container"] {
     background: #f0f4ff;
     border: 1px solid #d4dcfa;
@@ -85,111 +75,94 @@ html, body, [class*="css"] { font-family: 'Segoe UI', sans-serif; }
     padding: 1rem 1.2rem !important;
 }
 
-/* Divider */
 .custom-divider {
     border: none;
     border-top: 2px solid #e8ecf5;
     margin: 1.5rem 0;
 }
 
-/* Warning banner */
-.warn-box {
-    background: #fffbeb;
-    border-left: 4px solid #f59e0b;
+.disabled-box {
+    background: #f3f4f6;
+    border: 1px dashed #d1d5db;
     border-radius: 8px;
     padding: .75rem 1rem;
-    color: #92400e;
-    font-size: .9rem;
-    margin-bottom: 1rem;
+    color: #9ca3af;
+    font-size: .88rem;
+    text-align: center;
+    margin-top: 1.6rem;
 }
 
-/* No-data message */
 .no-data {
     text-align: center;
     padding: 3rem 1rem;
     color: #9ca3af;
     font-size: 1rem;
 }
+
+.error-box {
+    background: #fef2f2;
+    border-left: 4px solid #ef4444;
+    border-radius: 8px;
+    padding: .75rem 1rem;
+    color: #991b1b;
+    font-size: .9rem;
+    margin-bottom: 1rem;
+}
 </style>
 """, unsafe_allow_html=True)
 
 
 # ── Data loader ──────────────────────────────────────────────
-# ── Data loader (Google Sheets) ──────────────────────────────
-sheet_url = "https://docs.google.com/spreadsheets/d/1MUynpz5LOdHVTsMSK5V4aP8bTCGLHRSy02peJn6XXbk/export?format=csv"
-
-@st.cache_data
-def load_data():
+@st.cache_data(ttl=300)   # refresh every 5 minutes
+def load_data() -> pd.DataFrame:
+    """Fetch live data from Google Sheets (CSV export URL)."""
     try:
-        df = pd.read_csv(sheet_url)
-
-        # Clean column names (remove spaces)
-        df.columns = df.columns.str.strip()
-
-        # Ensure required columns exist
-        required_cols = [
-            "Batch",
-            "Course",
-            "Specialization",
-            "Subject",
-            "Pending_Assignments",
-            "Deadline",
-            "Professor",
-        ]
-
-        missing = [col for col in required_cols if col not in df.columns]
-        if missing:
-            st.error(f"Missing columns in Google Sheet: {missing}")
-            st.stop()
-
-        # Convert types safely
+        df = pd.read_csv(SHEET_URL)
+        df.columns = df.columns.str.strip()          # clean whitespace from headers
         df["Pending_Assignments"] = pd.to_numeric(
             df["Pending_Assignments"], errors="coerce"
-        ).fillna(0)
-
-        df["Deadline"] = pd.to_datetime(df["Deadline"], errors="coerce")
-
-        # Convert Batch to string (important!)
-        df["Batch"] = df["Batch"].astype(str)
-
+        ).fillna(0).astype(int)
         return df
-
     except Exception as e:
-        st.error("Failed to load data from Google Sheet.")
-        st.write(e)
-        st.stop()
+        st.markdown(
+            f"<div class='error-box'>⚠️ Could not load data from Google Sheets.<br>"
+            f"<small>{e}</small><br>"
+            f"Make sure the sheet is shared as <strong>'Anyone with the link can view'</strong>.</div>",
+            unsafe_allow_html=True,
+        )
+        return pd.DataFrame(columns=[
+            "Batch", "Course", "Section",
+            "Subject", "Pending_Assignments", "Deadline", "Professor"
+        ])
+
 
 # ── Session state init ────────────────────────────────────────
 def init_state():
     defaults = {
-        "page":        "landing",
-        "batch":       None,
-        "course":      None,
-        "spec1":       None,
-        "spec2":       None,
+        "page":    "landing",
+        "batch":   None,
+        "course":  None,
+        "section": None,
     }
     for k, v in defaults.items():
         if k not in st.session_state:
             st.session_state[k] = v
 
-# ── Timetable modal (dialog simulation) ──────────────────────
-def show_timetable_page():
-    """Render a simple timetable overlay."""
-    st.markdown("## 📅 Weekly Timetable")
-    st.info("This is a placeholder timetable. Connect your institution's schedule API or upload a timetable CSV to populate this section.")
 
-    days   = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+# ── Timetable page ────────────────────────────────────────────
+def show_timetable_page():
+    st.markdown("## 📅 Weekly Timetable")
+    st.info("Placeholder — connect your institution's schedule or upload a timetable CSV to populate this section.")
+
     slots  = ["9:00–10:00", "10:00–11:00", "11:00–12:00", "12:00–1:00", "2:00–3:00", "3:00–4:00"]
     sample = {
-        "Monday":    ["Machine Learning", "—", "Deep Learning", "Break", "Statistics", "Lab"],
-        "Tuesday":   ["Python for AI", "Cloud Arch.", "—", "Break", "DevOps", "—"],
-        "Wednesday": ["Networking", "—", "Linux Admin", "Break", "—", "Machine Learning"],
-        "Thursday":  ["Deep Learning", "Statistics", "—", "Break", "Python for AI", "Lab"],
-        "Friday":    ["—", "Cloud Arch.", "DevOps", "Break", "Linux Admin", "—"],
+        "Monday":    ["Machine Learning", "—", "Deep Learning",   "Break", "Statistics",  "Lab"],
+        "Tuesday":   ["Python",           "Cloud Arch.", "—",     "Break", "DevOps",      "—"],
+        "Wednesday": ["Networking",       "—", "Linux Admin",     "Break", "—",           "Machine Learning"],
+        "Thursday":  ["Deep Learning",    "Statistics", "—",      "Break", "Python",      "Lab"],
+        "Friday":    ["—",               "Cloud Arch.", "DevOps", "Break", "Linux Admin", "—"],
     }
-
-    tt_df = pd.DataFrame(sample, index=slots)
-    st.dataframe(tt_df, use_container_width=True)
+    st.dataframe(pd.DataFrame(sample, index=slots), use_container_width=True)
     st.markdown("<hr class='custom-divider'>", unsafe_allow_html=True)
     if st.button("← Back to Portal", key="tt_back"):
         st.session_state.page = "landing"
@@ -202,7 +175,7 @@ def landing_page(df: pd.DataFrame):
     st.markdown("""
     <div class="hero">
         <h1>🎓 Student Academic Portal</h1>
-        <p>Your one-stop dashboard to track assignments, deadlines & workload</p>
+        <p>Your one-stop dashboard to track assignments, deadlines &amp; workload</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -212,13 +185,13 @@ def landing_page(df: pd.DataFrame):
         <div class="usp-card"><div class="icon">📋</div><p>Track Assignments</p></div>
         <div class="usp-card"><div class="icon">⏰</div><p>Monitor Deadlines</p></div>
         <div class="usp-card"><div class="icon">📊</div><p>Subject-wise Workload</p></div>
-        <div class="usp-card"><div class="icon">⚡</div><p>Clean & Fast Interface</p></div>
+        <div class="usp-card"><div class="icon">⚡</div><p>Clean &amp; Fast Interface</p></div>
     </div>
     """, unsafe_allow_html=True)
 
     st.markdown("<hr class='custom-divider'>", unsafe_allow_html=True)
 
-    # ── Timetable button (top-right area) ─────────────────────
+    # Timetable button — top right
     _, tt_col = st.columns([6, 1])
     with tt_col:
         if st.button("📅 View Timetable", use_container_width=True):
@@ -230,16 +203,16 @@ def landing_page(df: pd.DataFrame):
 
     col1, col2, col3, col4 = st.columns(4)
 
-    batches = sorted(df["Batch"].unique().tolist())
+    # Batch
+    batches = sorted(df["Batch"].dropna().unique().tolist()) if not df.empty else []
     with col1:
         batch = st.selectbox("🗓 Batch", ["— Select —"] + batches, key="sel_batch")
 
-    # Cascade: course depends on batch
-    if batch != "— Select —":
-        courses = sorted(df[df["Batch"] == batch]["Course"].unique().tolist())
-    else:
-        courses = []
-
+    # Course — cascades from Batch
+    courses = (
+        sorted(df[df["Batch"] == batch]["Course"].dropna().unique().tolist())
+        if batch != "— Select —" else []
+    )
     with col2:
         course = st.selectbox(
             "📘 Course",
@@ -248,139 +221,122 @@ def landing_page(df: pd.DataFrame):
             disabled=(batch == "— Select —"),
         )
 
-    # Cascade: specialization depends on batch + course
-    if batch != "— Select —" and course != "— Select —":
-        specs = sorted(
-            df[(df["Batch"] == batch) & (df["Course"] == course)]["Specialization"].unique().tolist()
-        )
-    else:
-        specs = []
-
+    # Section 1 — cascades from Batch + Course
+    sections = (
+        sorted(df[(df["Batch"] == batch) & (df["Course"] == course)]["Section"].dropna().unique().tolist())
+        if (batch != "— Select —" and course != "— Select —") else []
+    )
     with col3:
-        spec1 = st.selectbox(
-            "🔬 Specialization 1",
-            ["— Select —"] + specs,
-            key="sel_spec1",
+        section1 = st.selectbox(
+            "🔬 Section 1",
+            ["— Select —"] + sections,
+            key="sel_section1",
             disabled=(course == "— Select —"),
         )
 
+    # Section 2 — permanently disabled placeholder
     with col4:
-        spec2 = st.selectbox(
-            "🔭 Specialization 2",
-            ["— Select —"] + specs,
-            key="sel_spec2",
-            disabled=(spec1 == "— Select —"),
-        )
-
-    # Duplicate specialization warning
-    if (
-        spec1 != "— Select —"
-        and spec2 != "— Select —"
-        and spec1 == spec2
-    ):
-        st.markdown(
-            "<div class='warn-box'>⚠️ Specialization 1 and Specialization 2 are the same. Please choose different specializations.</div>",
-            unsafe_allow_html=True,
-        )
+        st.markdown("<div class='disabled-box'>🔭 Section 2<br><small>Coming Soon</small></div>",
+                    unsafe_allow_html=True)
 
     st.markdown("<hr class='custom-divider'>", unsafe_allow_html=True)
 
-    # Continue button — disabled unless all fields are selected
-    all_selected = all(
-        v != "— Select —" for v in [batch, course, spec1, spec2]
-    ) and spec1 != spec2
+    # Continue — enabled only when all three active dropdowns are filled
+    all_selected = all(v != "— Select —" for v in [batch, course, section1])
 
     if not all_selected:
-        st.caption("ℹ️ Please complete all selections (with different specializations) to continue.")
+        st.caption("ℹ️ Please select Batch, Course, and Section 1 to continue.")
 
     if st.button(
         "Continue to Subjects →",
         disabled=not all_selected,
         type="primary",
-        use_container_width=False,
     ):
-        st.session_state.batch  = batch
-        st.session_state.course = course
-        st.session_state.spec1  = spec1
-        st.session_state.spec2  = spec2
-        st.session_state.page   = "subjects"
+        st.session_state.batch   = batch
+        st.session_state.course  = course
+        st.session_state.section = section1
+        st.session_state.page    = "subjects"
         st.rerun()
 
 
 # ── Subjects / Dashboard page ─────────────────────────────────
 def subjects_page(df: pd.DataFrame):
-    batch  = st.session_state.batch
-    course = st.session_state.course
-    spec1  = st.session_state.spec1
-    spec2  = st.session_state.spec2
+    batch   = st.session_state.batch
+    course  = st.session_state.course
+    section = st.session_state.section
 
-    # Back button
     if st.button("← Back", key="back_btn"):
         st.session_state.page = "landing"
         st.rerun()
 
-    # Page title
     st.markdown("## 📚 Subject Dashboard")
 
-    # Filter pills
+    # Active filter pills
     pills_html = "".join(
         f"<span class='filter-pill'>{label}: <strong>{val}</strong></span>"
-        for label, val in [("Batch", batch), ("Course", course),
-                           ("Spec 1", spec1), ("Spec 2", spec2)]
+        for label, val in [("Batch", batch), ("Course", course), ("Section 1", section)]
     )
+    pills_html += "<span class='filter-pill' style='opacity:.45;'>Section 2: Coming Soon</span>"
     st.markdown(pills_html, unsafe_allow_html=True)
     st.markdown("<hr class='custom-divider'>", unsafe_allow_html=True)
 
-    # Filter data
-    base = df[(df["Batch"] == batch) & (df["Course"] == course)]
-    df1  = base[base["Specialization"] == spec1]
-    df2  = base[base["Specialization"] == spec2]
+    # Filter
+    filtered = df[
+        (df["Batch"] == batch) &
+        (df["Course"] == course) &
+        (df["Section"] == section)
+    ]
 
-    total1    = int(df1["Pending_Assignments"].sum())
-    total2    = int(df2["Pending_Assignments"].sum())
-    combined  = total1 + total2
+    total_pending = int(filtered["Pending_Assignments"].sum())
+    total_subjects = len(filtered)
 
-    # ── Dashboard metrics ─────────────────────────────────────
+    # ── Metrics ───────────────────────────────────────────────
     m1, m2, m3 = st.columns(3)
-    m1.metric(f"📌 Pending — {spec1}", total1, help="Total pending assignments in Specialization 1")
-    m2.metric(f"📌 Pending — {spec2}", total2, help="Total pending assignments in Specialization 2")
-    m3.metric("🔢 Combined Total", combined, help="Sum of both specializations")
+    m1.metric("📌 Total Pending", total_pending,  help="Sum of all pending assignments")
+    m2.metric("📚 Total Subjects", total_subjects, help="Number of subjects this section")
+    avg = round(total_pending / total_subjects, 1) if total_subjects else 0
+    m3.metric("📈 Avg per Subject", avg,           help="Average pending per subject")
 
     st.markdown("<hr class='custom-divider'>", unsafe_allow_html=True)
 
     # ── Subject expanders ─────────────────────────────────────
-    def render_subjects(data: pd.DataFrame, spec_label: str):
-        st.markdown(f"### 🗂 {spec_label}")
-        if data.empty:
-            st.markdown(
-                "<div class='no-data'>😕 No subjects found for the selected filters.</div>",
-                unsafe_allow_html=True,
-            )
-            return
+    st.markdown(f"### 🗂 Section 1 — {section}")
 
-        for _, row in data.iterrows():
-            pending = int(row["Pending_Assignments"])
-            badge   = "🔴" if pending >= 3 else ("🟡" if pending == 2 else "🟢")
-            label   = f"{badge} {row['Subject']}  —  {pending} assignment{'s' if pending != 1 else ''} pending"
+    if filtered.empty:
+        st.markdown(
+            "<div class='no-data'>😕 No subjects found for the selected filters.<br>"
+            "<small>Check that your Google Sheet has matching data.</small></div>",
+            unsafe_allow_html=True,
+        )
+        return
 
-            with st.expander(label, expanded=False):
-                c1, c2, c3 = st.columns(3)
-                c1.markdown(f"**📋 Pending**\n\n{pending}")
-                c2.markdown(f"**📅 Deadline**\n\n{row['Deadline']}")
-                c3.markdown(f"**👨‍🏫 Professor**\n\n{row['Professor']}")
+    for _, row in filtered.iterrows():
+        pending = int(row["Pending_Assignments"])
+        badge   = "🔴" if pending >= 3 else ("🟡" if pending == 2 else "🟢")
+        label   = f"{badge} {row['Subject']}  —  {pending} assignment{'s' if pending != 1 else ''} pending"
 
-    render_subjects(df1, spec1)
+        with st.expander(label, expanded=False):
+            c1, c2, c3 = st.columns(3)
+            c1.markdown(f"**📋 Pending Assignments**\n\n{pending}")
+            c2.markdown(f"**📅 Deadline**\n\n{row['Deadline']}")
+            c3.markdown(f"**👨‍🏫 Professor**\n\n{row['Professor']}")
+
+    # Section 2 placeholder
     st.markdown("<hr class='custom-divider'>", unsafe_allow_html=True)
-    render_subjects(df2, spec2)
+    st.markdown("### 🔭 Section 2 — *Coming Soon*")
+    st.markdown(
+        "<div class='no-data' style='opacity:.6;'>Section 2 is not yet available.<br>"
+        "<small>It will appear here once enabled.</small></div>",
+        unsafe_allow_html=True,
+    )
 
 
-# ── App router ────────────────────────────────────────────────
+# ── Router ────────────────────────────────────────────────────
 def main():
     init_state()
     df = load_data()
 
     page = st.session_state.page
-
     if page == "timetable":
         show_timetable_page()
     elif page == "subjects":
