@@ -751,7 +751,7 @@ def show_timetable_page():
 def landing_page(df: pd.DataFrame):
     st.markdown("""
     <div class="hero">
-        <h1>🎓 Student Academic Portal</h1>
+        <h1>🎓 FC Student Portal</h1>
         <p>Your one-stop dashboard to track assignments, deadlines &amp; workload</p>
     </div>
     """, unsafe_allow_html=True)
