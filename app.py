@@ -113,12 +113,22 @@ html, body, [class*="css"] { font-family: 'Segoe UI', sans-serif; }
 
 
 # ── Data loader ──────────────────────────────────────────────
-@st.cache_data(ttl=300)   # refresh every 5 minutes
+REQUIRED_COLS = ["Batch", "Course", "Section", "Subject", "Pending_Assignments", "Deadline", "Professor"]
+
+@st.cache_data(ttl=300)
 def load_data() -> pd.DataFrame:
     """Fetch live data from Google Sheets (CSV export URL)."""
     try:
         df = pd.read_csv(SHEET_URL)
-        df.columns = df.columns.str.strip()          # clean whitespace from headers
+        # Normalize: strip whitespace + unify case for matching
+        df.columns = df.columns.str.strip()
+        # Build a case-insensitive rename map to expected column names
+        col_map = {c: c for c in df.columns}  # identity by default
+        for actual in df.columns:
+            for expected in REQUIRED_COLS:
+                if actual.lower() == expected.lower() and actual != expected:
+                    col_map[actual] = expected
+        df.rename(columns=col_map, inplace=True)
         df["Pending_Assignments"] = pd.to_numeric(
             df["Pending_Assignments"], errors="coerce"
         ).fillna(0).astype(int)
@@ -130,10 +140,22 @@ def load_data() -> pd.DataFrame:
             f"Make sure the sheet is shared as <strong>'Anyone with the link can view'</strong>.</div>",
             unsafe_allow_html=True,
         )
-        return pd.DataFrame(columns=[
-            "Batch", "Course", "Section",
-            "Subject", "Pending_Assignments", "Deadline", "Professor"
-        ])
+        return pd.DataFrame(columns=REQUIRED_COLS)
+
+
+def validate_columns(df: pd.DataFrame) -> bool:
+    """Check all required columns exist and show a clear error if not."""
+    missing = [c for c in REQUIRED_COLS if c not in df.columns]
+    if missing:
+        st.error(
+            f"**Column mismatch detected.**\n\n"
+            f"Missing columns: `{'`, `'.join(missing)}`\n\n"
+            f"Columns found in your sheet: `{'`, `'.join(df.columns.tolist())}`\n\n"
+            f"Expected exactly: `{'`, `'.join(REQUIRED_COLS)}`\n\n"
+            f"Fix the header row in your Google Sheet and try again."
+        )
+        return False
+    return True
 
 
 # ── Session state init ────────────────────────────────────────
@@ -335,6 +357,16 @@ def subjects_page(df: pd.DataFrame):
 def main():
     init_state()
     df = load_data()
+
+    # Always show column debug info in an expander for easy diagnosis
+    with st.expander("🛠 Debug: Sheet columns (remove after fixing)", expanded=False):
+        st.write("Columns detected:", df.columns.tolist())
+        st.write("Row count:", len(df))
+        if not df.empty:
+            st.dataframe(df.head(3))
+
+    if not validate_columns(df):
+        st.stop()
 
     page = st.session_state.page
     if page == "timetable":
