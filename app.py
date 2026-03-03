@@ -119,7 +119,7 @@ import pandas as pd
 import streamlit as st
 
 # 🔗 Google Sheet CSV Export Link
-sheet_url = https://docs.google.com/spreadsheets/d/1MUynpz5LOdHVTsMSK5V4aP8bTCGLHRSy02peJn6XXbk/export?format=csv
+sheet_url = "https://docs.google.com/spreadsheets/d/1MUynpz5LOdHVTsMSK5V4aP8bTCGLHRSy02peJn6XXbk/export?format=csv"
 
 @st.cache_data
 def load_data():
