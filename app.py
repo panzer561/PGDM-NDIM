@@ -418,7 +418,7 @@ def load_subjects() -> pd.DataFrame:
 
 @st.cache_data(ttl=1)
 def load_assignments() -> pd.DataFrame:
-    ASSIGNMENT_SHEET_GID = "423288098"   # ← replace with your Sheet 2 gid
+    ASSIGNMENT_SHEET_GID = "0"   # ← replace with your Sheet 2 gid
     base = "https://docs.google.com/spreadsheets/d/1MUynpz5LOdHVTsMSK5V4aP8bTCGLHRSy02peJn6XXbk/export?format=csv"
     try:
         df = pd.read_csv(f"{base}&gid={ASSIGNMENT_SHEET_GID}")
@@ -457,7 +457,6 @@ def landing_page(df: pd.DataFrame):
     # Navbar
     st.markdown("""
     <div class="nf-nav">
-        <div class="logo">NDIM</div>
         <div class="tagline">Academic Portal &nbsp;·&nbsp; PGDM 2025–27</div>
     </div>
     """, unsafe_allow_html=True)
@@ -466,7 +465,6 @@ def landing_page(df: pd.DataFrame):
     total_subjects = len(df) if not df.empty else 0
     st.markdown(f"""
     <div class="nf-hero">
-        <div class="badge">Now Streaming</div>
         <h1>Your Academic<br>Dashboard</h1>
         <p>Track every assignment, deadline, and subject — all in one place.</p>
         <div class="nf-hero-meta">
@@ -536,8 +534,7 @@ def subjects_page(df_subjects: pd.DataFrame, df_assignments: pd.DataFrame):
     with col_logo:
         st.markdown("""
         <div style='padding:.6rem 0;'>
-            <span style='font-size:1.6rem;font-weight:900;color:#e50914;letter-spacing:-1px;'>NDIM</span>
-            <span style='font-size:.78rem;color:#555;margin-left:.75rem;text-transform:uppercase;letter-spacing:.05em;'>Academic Portal</span>
+            <span style='font-size:.78rem;color:#555;text-transform:uppercase;letter-spacing:.05em;'>Academic Portal · PGDM 2025–27</span>
         </div>
         """, unsafe_allow_html=True)
     with col_back:
@@ -566,14 +563,12 @@ def subjects_page(df_subjects: pd.DataFrame, df_assignments: pd.DataFrame):
 
     total_pending  = int(filtered["Pending_Assignments"].sum())
     total_subjects = len(filtered)
-    avg = round(total_pending / total_subjects, 1) if total_subjects else 0
 
     # Metrics
     st.markdown('<div class="nf-row-title">📊 Overview</div>', unsafe_allow_html=True)
-    m1, m2, m3 = st.columns(3)
-    m1.metric("Total Pending",   total_pending)
-    m2.metric("Total Subjects",  total_subjects)
-    m3.metric("Avg per Subject", avg)
+    m1, m2 = st.columns(2)
+    m1.metric("Total Pending",  total_pending)
+    m2.metric("Total Subjects", total_subjects)
 
     divider()
 
