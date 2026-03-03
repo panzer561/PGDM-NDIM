@@ -115,33 +115,49 @@ html, body, [class*="css"] { font-family: 'Segoe UI', sans-serif; }
 
 
 # ── Data loader ──────────────────────────────────────────────
-import pandas as pd
-import streamlit as st
-
-# 🔗 Google Sheet CSV Export Link
+# ── Data loader (Google Sheets) ──────────────────────────────
 sheet_url = "https://docs.google.com/spreadsheets/d/1MUynpz5LOdHVTsMSK5V4aP8bTCGLHRSy02peJn6XXbk/export?format=csv"
 
 @st.cache_data
 def load_data():
-    df = pd.read_csv(sheet_url)
-    df["Deadline"] = pd.to_datetime(df["Deadline"])
-    return df
+    try:
+        df = pd.read_csv(sheet_url)
 
-df = load_data()
+        # Clean column names (remove spaces)
+        df.columns = df.columns.str.strip()
 
-# ── Session state init ────────────────────────────────────────
-def init_state():
-    defaults = {
-        "page":        "landing",
-        "batch":       None,
-        "course":      None,
-        "spec1":       None,
-        "spec2":       None,
-    }
-    for k, v in defaults.items():
-        if k not in st.session_state:
-            st.session_state[k] = v
+        # Ensure required columns exist
+        required_cols = [
+            "Batch",
+            "Course",
+            "Specialization",
+            "Subject",
+            "Pending_Assignments",
+            "Deadline",
+            "Professor",
+        ]
 
+        missing = [col for col in required_cols if col not in df.columns]
+        if missing:
+            st.error(f"Missing columns in Google Sheet: {missing}")
+            st.stop()
+
+        # Convert types safely
+        df["Pending_Assignments"] = pd.to_numeric(
+            df["Pending_Assignments"], errors="coerce"
+        ).fillna(0)
+
+        df["Deadline"] = pd.to_datetime(df["Deadline"], errors="coerce")
+
+        # Convert Batch to string (important!)
+        df["Batch"] = df["Batch"].astype(str)
+
+        return df
+
+    except Exception as e:
+        st.error("Failed to load data from Google Sheet.")
+        st.write(e)
+        st.stop()
 
 # ── Timetable modal (dialog simulation) ──────────────────────
 def show_timetable_page():
