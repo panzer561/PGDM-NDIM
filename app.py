@@ -159,6 +159,19 @@ def load_data():
         st.write(e)
         st.stop()
 
+# ── Session state init ────────────────────────────────────────
+def init_state():
+    defaults = {
+        "page":        "landing",
+        "batch":       None,
+        "course":      None,
+        "spec1":       None,
+        "spec2":       None,
+    }
+    for k, v in defaults.items():
+        if k not in st.session_state:
+            st.session_state[k] = v
+
 # ── Timetable modal (dialog simulation) ──────────────────────
 def show_timetable_page():
     """Render a simple timetable overlay."""
