@@ -5,7 +5,6 @@
 import streamlit as st
 import pandas as pd
 from datetime import date, timedelta
-import os
 
 # ── Page config ──────────────────────────────────────────────
 st.set_page_config(
@@ -116,80 +115,19 @@ html, body, [class*="css"] { font-family: 'Segoe UI', sans-serif; }
 
 
 # ── Data loader ──────────────────────────────────────────────
+import pandas as pd
+import streamlit as st
+
+# 🔗 Google Sheet CSV Export Link
+sheet_url = https://docs.google.com/spreadsheets/d/1MUynpz5LOdHVTsMSK5V4aP8bTCGLHRSy02peJn6XXbk/export?format=csv
+
 @st.cache_data
-def load_data() -> pd.DataFrame:
-    """Load from data.csv if present, else generate mock data."""
-    if os.path.exists("data.csv"):
-        return pd.read_csv("data.csv")
+def load_data():
+    df = pd.read_csv(sheet_url)
+    df["Deadline"] = pd.to_datetime(df["Deadline"])
+    return df
 
-    today = date.today()
-    rows = []
-
-    subjects_map = {
-        ("2024", "BCA", "AI & ML"): [
-            ("Machine Learning", 3, today + timedelta(5),  "Dr. Priya Sharma"),
-            ("Deep Learning",    2, today + timedelta(10), "Prof. Anil Kumar"),
-            ("Python for AI",    1, today + timedelta(3),  "Dr. Neha Verma"),
-            ("Statistics",       4, today + timedelta(7),  "Dr. Rakesh Gupta"),
-        ],
-        ("2024", "BCA", "Cloud Computing"): [
-            ("Cloud Architecture",  2, today + timedelta(6),  "Prof. Suresh Iyer"),
-            ("DevOps Fundamentals", 3, today + timedelta(12), "Dr. Meera Pillai"),
-            ("Networking Basics",   1, today + timedelta(4),  "Prof. Kavya Nair"),
-            ("Linux Administration",2, today + timedelta(9),  "Dr. Amit Joshi"),
-        ],
-        ("2024", "BCA", "Cybersecurity"): [
-            ("Ethical Hacking",   2, today + timedelta(8),  "Prof. Rahul Das"),
-            ("Cryptography",      3, today + timedelta(11), "Dr. Sunita Rao"),
-            ("Network Security",  1, today + timedelta(5),  "Prof. Vikas Singh"),
-            ("Digital Forensics", 4, today + timedelta(14), "Dr. Pooja Mehta"),
-        ],
-        ("2024", "MCA", "Data Science"): [
-            ("Big Data Analytics", 2, today + timedelta(6),  "Dr. Ananya Roy"),
-            ("Data Visualization", 3, today + timedelta(9),  "Prof. Sanjay Tiwari"),
-            ("SQL & NoSQL",        1, today + timedelta(4),  "Dr. Rekha Nambiar"),
-            ("R Programming",      2, today + timedelta(11), "Prof. Deepak Shah"),
-        ],
-        ("2024", "MCA", "Software Engineering"): [
-            ("Software Design",    3, today + timedelta(7),  "Dr. Harish Menon"),
-            ("Agile Methodology",  2, today + timedelta(10), "Prof. Usha Reddy"),
-            ("Testing & QA",       1, today + timedelta(5),  "Dr. Vijay Krishnan"),
-            ("Project Management", 4, today + timedelta(13), "Prof. Asha Bhatt"),
-        ],
-        ("2024", "MCA", "IoT"): [
-            ("Embedded Systems",   2, today + timedelta(8),  "Dr. Kiran Bose"),
-            ("Sensor Networks",    3, today + timedelta(6),  "Prof. Lalitha Mohan"),
-            ("Arduino & RPi",      1, today + timedelta(4),  "Dr. Sudhir Kapoor"),
-            ("IoT Security",       2, today + timedelta(12), "Prof. Nandita Ghosh"),
-        ],
-        ("2023", "BCA", "AI & ML"): [
-            ("Advanced ML",       4, today + timedelta(5),  "Dr. Priya Sharma"),
-            ("NLP",               2, today + timedelta(9),  "Prof. Anil Kumar"),
-            ("Computer Vision",   3, today + timedelta(7),  "Dr. Neha Verma"),
-            ("AI Ethics",         1, today + timedelta(11), "Dr. Rakesh Gupta"),
-        ],
-        ("2023", "BCA", "Cloud Computing"): [
-            ("AWS Practitioner",   3, today + timedelta(6),  "Prof. Suresh Iyer"),
-            ("Kubernetes",         2, today + timedelta(10), "Dr. Meera Pillai"),
-            ("Serverless Apps",    1, today + timedelta(5),  "Prof. Kavya Nair"),
-            ("Cloud Security",     4, today + timedelta(8),  "Dr. Amit Joshi"),
-        ],
-    }
-
-    for (batch, course, spec), subjects in subjects_map.items():
-        for subj, pending, deadline, prof in subjects:
-            rows.append({
-                "Batch":               batch,
-                "Course":              course,
-                "Specialization":      spec,
-                "Subject":             subj,
-                "Pending_Assignments": pending,
-                "Deadline":            deadline.strftime("%Y-%m-%d"),
-                "Professor":           prof,
-            })
-
-    return pd.DataFrame(rows)
-
+df = load_data()
 
 # ── Session state init ────────────────────────────────────────
 def init_state():
