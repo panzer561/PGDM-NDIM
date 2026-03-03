@@ -115,7 +115,7 @@ html, body, [class*="css"] { font-family: 'Segoe UI', sans-serif; }
 # ── Data loader ──────────────────────────────────────────────
 REQUIRED_COLS = ["Batch", "Course", "Section", "Subject", "Pending_Assignments", "Deadline", "Professor"]
 
-@st.cache_data(ttl=300)
+@st.cache_data(ttl=60)
 def load_data() -> pd.DataFrame:
     """Fetch live data from Google Sheets (CSV export URL)."""
     try:
