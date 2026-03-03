@@ -359,22 +359,6 @@ def main():
     df = load_data()
 
     # Always show column debug info in an expander for easy diagnosis
-    with st.expander("🛠 Debug: Sheet columns (remove after fixing)", expanded=False):
-        st.write("Columns detected:", df.columns.tolist())
-        st.write("Row count:", len(df))
-        if not df.empty:
-            st.dataframe(df.head(3))
-
-    if not validate_columns(df):
-        st.stop()
-
-    page = st.session_state.page
-    if page == "timetable":
-        show_timetable_page()
-    elif page == "subjects":
-        subjects_page(df)
-    else:
-        landing_page(df)
 
 
 if __name__ == "__main__":
