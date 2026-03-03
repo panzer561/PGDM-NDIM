@@ -13,7 +13,7 @@ CORE_COLS             = ["Batch", "Course", "Section", "Subject", "Pending_Assig
 ASSIGNMENT_FIXED_COLS = ["Assignment_No", "Description", "Deadline"]
 
 st.set_page_config(
-    page_title="NDIM Academic Portal",
+    page_title="FC Academic Portal",
     page_icon="🎓",
     layout="wide",
     initial_sidebar_state="collapsed",
@@ -465,7 +465,7 @@ def landing_page(df: pd.DataFrame):
     total_subjects = len(df) if not df.empty else 0
     st.markdown(f"""
     <div class="nf-hero">
-        <h1>Your Academic<br>Dashboard</h1>
+        <h1>Academic<br>Dashboard</h1>
         <p>Track every assignment, deadline, and subject — all in one place.</p>
         <div class="nf-hero-meta">
             <div>Batch &nbsp;<span>{FIXED_BATCH}</span></div>
