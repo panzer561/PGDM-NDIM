@@ -243,7 +243,7 @@ def load_assignments() -> pd.DataFrame:
       3. Look at the URL: ...#gid=XXXXXXXXX
       4. Paste that number in ASSIGNMENT_SHEET_GID below
     """
-    ASSIGNMENT_SHEET_GID = "423288098"   # ← REPLACE with your actual Sheet 2 gid
+    ASSIGNMENT_SHEET_GID = "0"   # ← REPLACE with your actual Sheet 2 gid
 
     base = "https://docs.google.com/spreadsheets/d/1MUynpz5LOdHVTsMSK5V4aP8bTCGLHRSy02peJn6XXbk/export?format=csv"
     assign_url = f"{base}&gid={ASSIGNMENT_SHEET_GID}"
@@ -289,21 +289,462 @@ def init_state():
 
 # ── Timetable page ────────────────────────────────────────────
 def show_timetable_page():
-    st.markdown("## 📅 Weekly Timetable")
-    st.info("Placeholder — connect your institution's schedule or upload a timetable CSV.")
-    slots  = ["9:00–10:00", "10:00–11:00", "11:00–12:00", "12:00–1:00", "2:00–3:00", "3:00–4:00"]
-    sample = {
-        "Monday":    ["Machine Learning", "—", "Deep Learning",   "Break", "Statistics",  "Lab"],
-        "Tuesday":   ["Python",           "Cloud Arch.", "—",     "Break", "DevOps",      "—"],
-        "Wednesday": ["Networking",       "—", "Linux Admin",     "Break", "—",           "Machine Learning"],
-        "Thursday":  ["Deep Learning",    "Statistics", "—",      "Break", "Python",      "Lab"],
-        "Friday":    ["—",               "Cloud Arch.", "DevOps", "Break", "Linux Admin", "—"],
-    }
-    st.dataframe(pd.DataFrame(sample, index=slots), use_container_width=True)
-    st.markdown("<hr class='custom-divider'>", unsafe_allow_html=True)
     if st.button("← Back to Portal", key="tt_back"):
         st.session_state.page = "landing"
         st.rerun()
+
+    st.markdown("## 📅 Timetable — Semester II (PGDM 2025–2027)")
+    st.caption("Wednesday 04 Mar 2026 is a **Holiday — Holi** 🎨")
+    st.markdown("<hr class='custom-divider'>", unsafe_allow_html=True)
+
+    # ── Full timetable data ───────────────────────────────────
+    # Structure: { day: { section: { slot: (subject, professor, room) } } }
+    TT = {
+        "Monday (02 Mar)": {
+            # --- Major-2 sections ---
+            "AIML-A": {
+                "9:40–10:55":  ("Data Engineering Using SQLite", "Dr. Rinku Dixit", "WB 5401"),
+                "11:05–12:20": ("Machine Learning using Python", "Dr. Shailee Choudhary", "WB 5401"),
+            },
+            "AIML-B": {
+                "9:40–10:55":  ("Machine Learning using Python", "Dr. Shailee Choudhary", "WB 5402"),
+                "11:05–12:20": ("ML using Knime & Alteryx + FC Session", "Dr. Nabeela Hasan", "WB 5402"),
+            },
+            "AIML-C": {
+                "9:40–10:55":  ("ML using Knime & Alteryx", "Dr. Nabeela Hasan", "WB 5403"),
+                "11:05–12:20": ("Data Engineering Using SQLite + FC Session", "Dr. Rinku Dixit", "WB 5403"),
+            },
+            "MF": {
+                "9:40–10:55":  ("Sales & Distribution Management", "Dr. Prabal Chakraborty", "KB 301"),
+                "11:05–12:20": ("Sales & Distribution Management", "Dr. Prabal Chakraborty", "KB 301"),
+            },
+            "MG": {
+                "9:40–10:55":  ("Sales & Distribution Management", "Dr. Gajendra Sharma", "KB 302"),
+                "11:05–12:20": ("Sales & Distribution Management", "Dr. Gajendra Sharma", "KB 302"),
+            },
+            "FE": {
+                "9:40–10:55":  ("SAPM", "Dr. Rajbeer Kaur", "WB 5405"),
+                "11:05–12:20": ("Mergers and Acquisitions", "Dr. Geetika Batra", "WB 5405"),
+            },
+            "DM": {
+                "9:40–10:55":  ("PPC Campaigns", "Prof. Kunal Jha", "KB 102"),
+                "11:05–12:20": ("PPC Campaigns", "Prof. Kunal Jha", "KB 102"),
+            },
+            "HR2": {
+                "9:40–10:55":  ("Performance Management System", "Prof. Parveen Kaur", "WB 5501"),
+                "11:05–12:20": ("Talent Acquisition", "Dr. Aaqib Danish", "WB 5501"),
+            },
+            "FAIM": {
+                "9:40–10:55":  ("Alternative Assets & Private Equity", "Dr. Geetika Batra", "WB 5502"),
+                "11:05–12:20": ("Financial Planning", "Dr. Sharif / Dr. Somnath", "WB 5502"),
+            },
+            "OPR-A": {
+                "9:40–10:55":  ("Operations Research & Application", "Dr. MKP Naik", "KB 303"),
+                "11:05–12:20": ("Logistics & SCM", "Prof. Arun Kumar", "KB 303"),
+            },
+            "OPR-B": {
+                "9:40–10:55":  ("Logistics & SCM", "Prof. Arun Kumar", "KB 6500"),
+                "11:05–12:20": ("Operations Research & Application + FC Session", "Dr. MKP Naik", "KB 6500"),
+            },
+            # --- Major-1 sections ---
+            "MA": {
+                "12:30–1:45": ("Sales & Distribution Management", "Prof. Veena Kumar / Dr. Samriti Mahajan", "WB 5401"),
+                "2:20–3:35":  ("Power BI", "Dr. Raj Kumar Garg", "WB 5401 (Lab)"),
+                "3:45–5:00":  ("CSD-2", "Dr. Jyoti Kukreja / Angad Munshi", "WB 5401"),
+            },
+            "MB": {
+                "12:30–1:45": ("Financial Management", "Dr. Pushpa Negi", "WB 5402"),
+                "2:20–3:35":  ("Strategic Brand Communication (IMC)", "Dr. Komal Khatter", "WB 5402"),
+                "3:45–5:00":  ("Economic Environment of Business", "Dr. Charu Tayal", "WB 5402"),
+            },
+            "MC": {
+                "12:30–1:45": ("Research Methodology", "Dr. S S Khullar", "WB 5403"),
+                "2:20–3:35":  ("Sales & Distribution Management", "Prof. Veena Kumar", "WB 5403"),
+                "3:45–5:00":  ("HRM", "Dr. Tanveer Shah", "WB 5403"),
+            },
+            "MD": {
+                "12:30–1:45": ("HRM AI Integration Module", "Dr. Antarpreet Singh / Dr. Aaqib Danish", "WB 5501"),
+                "2:20–3:35":  ("CSD-2", "Dr. Jyoti Kukreja / Dr. Samriti Mahajan", "WB 5501"),
+                "3:45–5:00":  ("Research Methodology", "Dr. Elizabeth Jacob", "WB 5501"),
+            },
+            "ME": {
+                "12:30–1:45": ("Financial Management", "Dr. Nidhi Mathur", "WB 5502"),
+                "2:20–3:35":  ("Strategic International Business Operations", "Dr. S P Sharma", "WB 5502"),
+                "3:45–5:00":  ("Strategic Brand Communication (IMC)", "Dr. Chaitali / Dr. Mohd. Azhar", "WB 5502"),
+            },
+            "FA": {
+                "12:30–1:45": ("Research Methodology", "Prof. Sayanti Banerjee", "KB 301"),
+                "2:20–3:35":  ("HRM", "Dr. Sunaina Sardana", "KB 301"),
+                "3:45–5:00":  ("SAPM", "Dr. Som Nath Paul", "KB 301"),
+            },
+            "FB": {
+                "12:30–1:45": ("Corporate Finance", "Dr. Silky Vigg", "KB 302"),
+                "2:20–3:35":  ("CSD-2 + Guest Session", "Dr. Parul Malik", "KB 302"),
+                "3:45–5:00":  ("Research Methodology", "Prof. Sayanti Banerjee", "KB 302"),
+            },
+            "FC": {
+                "12:30–1:45": ("HRM", "Dr. Rashmi Chauhan", "KB 303"),
+                "2:20–3:35":  ("SAPM", "Dr. Som Nath Paul", "KB 303"),
+                "3:45–5:00":  ("Corporate Finance", "Dr. Nidhi Mathur", "KB 303"),
+            },
+            "FD": {
+                "12:30–1:45": ("Principle of Banking", "Prof. Rachna Kathuria", "KB 6500"),
+                "2:20–3:35":  ("HRM AI Integration Module", "Dr. Antarpreet Singh / Dr. Tanveer Shah", "KB 6500"),
+                "3:45–5:00":  ("Power BI", "Prof. Praveen Malik", "KB 6500"),
+            },
+            "HR": {
+                "12:30–1:45": ("Power BI", "Dr. Raj Kumar Garg", "WB 5405 (Lab)"),
+                "2:20–3:35":  ("Research Methodology", "Dr. S S Khullar / Dr. Elizabeth", "WB 5405"),
+                "3:45–5:00":  ("Financial Management", "Dr. Saib Fakhar / Dr. Silky Vigg", "WB 5405"),
+            },
+        },
+        "Tuesday (03 Mar)": {
+            "MA": {
+                "9:40–10:40":  ("Digital Marketing Social Media", "Prof. Sonal Gulati", "WB 5401"),
+                "10:50–11:50": ("Strategic Brand Communication (IMC)", "Dr. Ritu Talwar", "WB 5401"),
+                "12:00–1:00":  ("HRM", "Dr. Monica Verma", "WB 5401"),
+                "1:40–2:40":   ("Business Intelligence using Emerging Technology", "Dr. Kamal Kundra", "WB 5401"),
+                "2:50–3:50":   ("Financial Management", "Dr. Rajbeer Kaur", "WB 5401"),
+            },
+            "MB": {
+                "9:40–10:40":  ("Aptitude", "Prof. Atul Rawat", "WB 5402"),
+                "10:50–11:50": ("Strategic Brand Communication (IMC)", "Dr. Komal Khatter", "WB 5402"),
+                "12:00–1:00":  ("CSD-2", "Dr. Mahima Gulati", "WB 5402"),
+                "1:40–2:40":   ("Research Methodology", "Dr. Elizabeth Jacob", "WB 5402"),
+                "2:50–3:50":   ("Sales & Distribution Management", "Dr. Swati Bhatnagar", "WB 5402"),
+            },
+            "MC": {
+                "9:40–10:40":  ("Strategic Brand Communication (IMC)", "Dr. Ritu Talwar", "WB 5403"),
+                "10:50–11:50": ("Power BI", "Dr. Raj Kumar Garg", "WB 5403 (Lab)"),
+                "12:00–1:00":  ("Strategic International Business Operations", "Dr. S P Sharma", "WB 5403"),
+                "1:40–2:40":   ("Aptitude", "Prof. Atul Rawat", "WB 5403"),
+                "2:50–3:50":   ("Financial Management", "Dr. Kavita Berwal / Dr. Pushpa Negi", "WB 5403"),
+            },
+            "MD": {
+                "9:40–10:40":  ("Strategic Brand Communication (IMC)", "Prof. Abha Grover / Dr. Sarita Nagvanshi", "WB 5501"),
+                "10:50–11:50": ("Economic Environment of Business", "Dr. Shagun Arora", "WB 5501"),
+                "12:00–1:00":  ("Economic Environment of Business", "Dr. Shagun Arora", "WB 5501"),
+                "1:40–2:40":   ("Power BI", "Prof. Praveen Malik", "WB 5501 (Lab)"),
+                "2:50–3:50":   ("Aptitude", "Prof. Atul Rawat", "WB 5501"),
+            },
+            "ME": {
+                "9:40–10:40":  ("CSD-2", "Dr. Mahima Gulati", "WB 5502"),
+                "10:50–11:50": ("Sales & Distribution Management", "Dr. Gajendra Sharma", "WB 5502"),
+                "12:00–1:00":  ("Strategic Brand Communication (IMC)", "Dr. Chaitali / Dr. Mohd. Azhar", "WB 5502"),
+                "1:40–2:40":   ("Digital Marketing Social Media", "Prof. Kunal Jha", "WB 5502 (Lab)"),
+                "2:50–3:50":   ("Economic Environment of Business", "Prof. Karan Khati", "WB 5502"),
+            },
+            "FA": {
+                "9:40–10:40":  ("Economic Environment of Business", "Prof. Karan Khati", "KB 301"),
+                "10:50–11:50": ("Power BI", "Dr. Arpana Chaturvedi", "KB 301 (Lab)"),
+                "12:00–1:00":  ("Principle of Insurance", "Prof. Dinesh Gupta", "KB 301"),
+                "1:40–2:40":   ("CSD-2", "Dr. Parul Malik", "KB 301"),
+                "2:50–3:50":   ("Research Methodology", "Prof. Sayanti Banerjee", "KB 301"),
+            },
+            "FB": {
+                "9:40–10:40":  ("Strategic International Business Operations", "Dr. Sangeeta Yadav", "KB 302"),
+                "10:50–11:50": ("Principle of Insurance", "Prof. Dinesh Gupta", "KB 302"),
+                "12:00–1:00":  ("HRM", "Dr. Sunaina Sardana", "KB 302"),
+                "1:40–2:40":   ("Research Methodology", "Prof. Sayanti Banerjee", "KB 302"),
+                "2:50–3:50":   ("Power BI", "Dr. Arpana Chaturvedi", "KB 302 (Lab)"),
+            },
+            "FC": {
+                "9:40–10:40":  ("Principle of Insurance", "Prof. Dinesh Gupta", "KB 303"),
+                "10:50–11:50": ("SAPM", "Dr. Som Nath Paul", "KB 303"),
+                "12:00–1:00":  ("FMS", "Dr. Agnihotri", "KB 303"),
+                "1:40–2:40":   ("HRM AI Integration Module", "Dr. Antarpreet Singh / Dr. Rashmi Chauhan", "KB 303"),
+                "2:50–3:50":   ("Business Intelligence using Emerging Technology", "Dr. Kamal Kundra", "KB 303"),
+            },
+            "FD": {
+                "9:40–10:40":  ("Economic Environment of Business", "Dr. Shagun Arora", "KB 6500"),
+                "10:50–11:50": ("FMS", "Dr. Agnihotri", "KB 6500"),
+                "12:00–1:00":  ("Corporate Finance", "Dr. Silky Vigg", "KB 6500"),
+                "1:40–2:40":   ("SAPM", "Dr. Haseen / Dr. Som Nath Paul", "KB 6500"),
+                "2:50–3:50":   ("Power BI", "Prof. Praveen Malik", "KB 6500 (Lab)"),
+            },
+            "HR": {
+                "9:40–10:40":  ("Research Methodology", "Dr. S S Khullar / Dr. Elizabeth", "WB 5405"),
+                "10:50–11:50": ("HRM", "Dr. Monica Verma", "WB 5405"),
+                "12:00–1:00":  ("Psychometrics & Competency Mapping", "Dr. Radha Sharma", "WB 5405"),
+                "1:40–2:40":   ("CSD-2", "Prof. Nikhil Singh", "WB 5405"),
+                "2:50–3:50":   ("Economic Environment of Business", "Dr. Zeeshan", "WB 5405"),
+            },
+        },
+        "Wednesday (04 Mar)": {
+            "ALL SECTIONS": {
+                "Full Day": ("🎨 HOLIDAY — HOLI", "—", "—"),
+            },
+        },
+        "Thursday (05 Mar)": {
+            "MA": {
+                "9:40–10:55":  ("Power BI", "Dr. Raj Kumar Garg", "WB 5401 (Lab)"),
+                "11:05–12:20": ("Strategic Brand Communication (IMC)", "Dr. Ritu Talwar", "WB 5401"),
+                "12:30–1:45":  ("Sales & Distribution Management", "Prof. Veena Kumar / Dr. Samriti Mahajan", "WB 5401"),
+                "2:20–3:35":   ("Aptitude", "Prof. Atul Rawat", "WB 5401"),
+                "3:45–5:00":   ("CSD-2", "Dr. Jyoti Kukreja / Angad Munshi", "WB 5401"),
+            },
+            "MB": {
+                "9:40–10:55":  ("HRM", "Dr. Tanveer Shah", "WB 5402"),
+                "11:05–12:20": ("Digital Marketing Social Media", "Prof. Kunal Jha", "WB 5402"),
+                "12:30–1:45":  ("Financial Management", "Dr. Pushpa Negi", "WB 5402"),
+                "2:20–3:35":   ("Power BI", "Dr. Raj Kumar Garg", "WB 5402 (Lab)"),
+                "3:45–5:00":   ("CSD-2", "Dr. Mahima Gulati", "WB 5402"),
+            },
+            "MC": {
+                "9:40–10:55":  ("Strategic Brand Communication (IMC)", "Dr. Ritu Talwar", "WB 5403"),
+                "11:05–12:20": ("Sales & Distribution Management", "Prof. Veena Kumar", "WB 5403"),
+                "12:30–1:45":  ("CSD-2", "Dr. Jyoti Kukreja / Angad Munshi", "WB 5403"),
+                "2:20–3:35":   ("Business Intelligence using Emerging Technology", "Dr. Kamal Kundra", "WB 5403 (Lab)"),
+                "3:45–5:00":   ("Financial Management", "Dr. Kavita Berwal / Dr. Pushpa Negi", "WB 5403"),
+            },
+            "MD": {
+                "9:40–10:55":  ("Strategic Brand Communication (IMC)", "Prof. Abha Grover / Dr. Sarita Nagvanshi", "WB 5501"),
+                "11:05–12:20": ("Strategic International Business Operations", "Dr. S P Sharma", "WB 5501"),
+                "12:30–1:45":  ("Power BI", "Prof. Praveen Malik", "WB 5501 (Lab)"),
+                "2:20–3:35":   ("Financial Management", "Dr. Sharif Mohd. / Dr. Nidhi Mathur", "WB 5501"),
+                "3:45–5:00":   ("Digital Marketing Social Media", "Prof. Kunal Jha", "WB 5501"),
+            },
+            "ME": {
+                "9:40–10:55":  ("Aptitude", "Prof. Atul Rawat", "WB 5502"),
+                "11:05–12:20": ("Power BI", "Prof. Praveen Malik", "WB 5502 (Lab)"),
+                "12:30–1:45":  ("HRM AI Integration Module", "Dr. Antarpreet Singh / Dr. Aaqib Danish", "WB 5502"),
+                "2:20–3:35":   ("Research Methodology", "Dr. Anuj Nain", "WB 5502"),
+                "3:45–5:00":   ("Business Intelligence using Emerging Technology", "Dr. Kamal Kundra", "WB 5502"),
+            },
+            "FA": {
+                "9:40–10:55":  ("Strategic International Business Operations", "Dr. Sangeeta Yadav (9:50–10:50)", "KB 301"),
+                "11:05–12:20": ("Corporate Finance", "Dr. Pushpa Negi", "KB 301"),
+                "12:30–1:45":  ("Power BI", "Dr. Arpana Chaturvedi", "KB 301 (Lab)"),
+                "2:20–3:35":   ("Corporate Finance", "Dr. Pushpa Negi", "KB 301"),
+                "3:45–5:00":   ("CSD-2", "Dr. Parul Malik", "KB 301"),
+            },
+            "FB": {
+                "9:40–10:55":  ("SAPM", "Dr. Som Nath Paul", "KB 302"),
+                "11:05–12:20": ("Power BI", "Dr. Arpana Chaturvedi", "KB 302 (Lab)"),
+                "12:30–1:45":  ("Aptitude", "Prof. Atul Rawat", "KB 302 (Lab)"),
+                "2:20–3:35":   ("CSD-2", "Dr. Parul Malik", "KB 302"),
+                "3:45–5:00":   ("—", "—", "—"),
+            },
+            "FC": {
+                "9:40–10:55":  ("Research Methodology", "Dr. Mohd. Azhar / Dr. Anuj Nain", "KB 303"),
+                "11:05–12:20": ("Economic Environment of Business", "Dr. Zeeshan", "KB 303"),
+                "12:30–1:45":  ("FMS", "Dr. Agnihotri", "KB 303"),
+                "2:20–3:35":   ("Power BI", "Dr. Arpana Chaturvedi", "KB 303 (Lab)"),
+                "3:45–5:00":   ("Aptitude", "Prof. Atul Rawat", "KB 303"),
+            },
+            "FD": {
+                "9:40–10:55":  ("Economic Environment of Business", "Dr. Shagun Arora", "KB 6500"),
+                "11:05–12:20": ("FMS", "Dr. Agnihotri", "KB 6500"),
+                "12:30–1:45":  ("Research Methodology", "Dr. Mohd. Azhar / Dr. Anuj Nain", "KB 6500"),
+                "2:20–3:35":   ("SAPM", "Dr. Haseen / Dr. Som Nath Paul", "KB 6500"),
+                "3:45–5:00":   ("Principle of Insurance", "CA Navin Saraf", "KB 6500"),
+            },
+            "HR": {
+                "9:40–10:55":  ("Performance Management System", "Prof. Parveen Kaur", "WB 5405"),
+                "11:05–12:20": ("Aptitude", "Prof. Atul Rawat", "WB 5405"),
+                "12:30–1:45":  ("Talent Acquisition", "Dr. Teena Singh (12:30–2:30)", "WB 5405"),
+                "2:20–3:35":   ("—", "—", "—"),
+                "3:45–5:00":   ("Psychometrics & Competency Mapping", "Dr. Radha Sharma", "WB 5405"),
+            },
+        },
+        "Friday (06 Mar)": {
+            "MA": {
+                "9:40–10:50":  ("Financial Management", "Dr. Rajbeer Kaur", "WB 5401"),
+                "2:00–3:10":   ("HRM", "Dr. Monica Verma", "WB 5401"),
+                "3:20–4:30":   ("Economic Environment of Business", "Dr. Charu Tayal", "WB 5401"),
+            },
+            "MB": {
+                "9:40–10:50":  ("Research Methodology", "Dr. Elizabeth Jacob", "WB 5402"),
+                "2:00–3:10":   ("HRM AI Integration Module", "Dr. Antarpreet Singh / Dr. Tanveer Shah", "WB 5402"),
+                "3:20–4:30":   ("Sales & Distribution Management", "Dr. Swati Bhatnagar", "WB 5402"),
+            },
+            "MC": {
+                "9:40–10:50":  ("Business to Business Marketing", "Prof. Angad Munshi", "WB 5403"),
+                "2:00–3:10":   ("CSD-2", "Dr. Jyoti Kukreja / Angad Munshi", "WB 5403"),
+                "3:20–4:30":   ("Digital Marketing Social Media", "Prof. Kunal Jha", "WB 5403"),
+            },
+            "MD": {
+                "9:40–10:50":  ("Financial Management", "Dr. Sharif Mohd. / Dr. Nidhi Mathur", "WB 5501"),
+                "2:00–3:10":   ("Sales & Distribution Management", "Dr. Swati Bhatnagar", "WB 5501"),
+                "3:20–4:30":   ("Research Methodology", "Dr. Elizabeth Jacob", "WB 5501"),
+            },
+            "ME": {
+                "9:40–10:50":  ("Economic Environment of Business", "Prof. Karan Khati", "WB 5502"),
+                "2:00–3:10":   ("CSD-2", "Dr. Mahima Gulati", "WB 5502"),
+                "3:20–4:30":   ("Sales & Distribution Management", "Dr. Gajendra Sharma", "WB 5502"),
+            },
+            "FA": {
+                "9:40–10:50":  ("Mergers and Acquisitions", "Prof. Manav Vigg", "KB 301"),
+                "2:00–3:10":   ("HRM", "Dr. Sunaina Sardana", "KB 301"),
+                "3:20–4:30":   ("Economic Environment of Business", "Prof. Karan Khati", "KB 301"),
+            },
+            "FB": {
+                "9:40–10:50":  ("Corporate Finance", "Dr. Silky Vigg", "KB 302"),
+                "2:00–3:10":   ("Economic Environment of Business", "Prof. Karan Khati", "KB 302"),
+                "3:20–4:30":   ("SAPM", "Dr. Som Nath Paul", "KB 302"),
+            },
+            "FC": {
+                "9:40–10:50":  ("CSD-2", "Dr. Parul Malik", "KB 303"),
+                "2:00–3:10":   ("Mergers and Acquisitions", "Prof. Manav Vigg", "KB 303"),
+                "3:20–4:30":   ("Corporate Finance", "Dr. Nidhi Mathur", "KB 303"),
+            },
+            "FD": {
+                "9:40–10:50":  ("Mergers and Acquisitions", "Dr. Geetika Batra", "KB 6500"),
+                "2:00–3:10":   ("Corporate Finance", "Dr. Silky Vigg", "KB 6500"),
+                "3:20–4:30":   ("CSD-2", "Dr. Mahima Gulati / Prof. Manav Vigg", "KB 6500"),
+            },
+            "HR": {
+                "9:40–10:50":  ("Performance Management System", "Prof. Parveen Kaur", "WB 5405"),
+                "2:00–3:10":   ("CSD-2", "Prof. Nikhil Singh", "WB 5405"),
+                "3:20–4:30":   ("HRM", "Dr. Monica Verma", "WB 5405"),
+            },
+            # Major-2 Friday
+            "AIML-A": {
+                "11:00–12:10": ("Machine Learning using Python", "Dr. Shailee Choudhary", "WB 5401"),
+                "12:20–1:30":  ("ML using Knime & Alteryx", "Dr. Nabeela Hasan", "WB 5401"),
+            },
+            "AIML-B": {
+                "11:00–12:10": ("ML using Knime & Alteryx", "Dr. Nabeela Hasan", "WB 5402"),
+                "12:20–1:30":  ("Data Engineering Using SQLite", "Dr. Rinku Dixit", "WB 5402"),
+            },
+            "AIML-C": {
+                "11:00–12:10": ("Data Engineering Using SQLite", "Dr. Rinku Dixit", "WB 5403"),
+                "12:20–1:30":  ("Machine Learning using Python", "Dr. Shailee Choudhary", "WB 5403"),
+            },
+            "MF": {
+                "11:00–12:10": ("Strategic Brand Communication (IMC)", "Prof. Abha Grover", "KB 301"),
+                "12:20–1:30":  ("Sales & Distribution Management", "Dr. Prabal Chakraborty", "KB 301"),
+            },
+            "MG": {
+                "11:00–12:10": ("Sales & Distribution Management", "Dr. Gajendra Sharma", "KB 302"),
+                "12:20–1:30":  ("Strategic Brand Communication (IMC)", "Prof. Abha Grover / Prof. Sarita Nagvanshi", "KB 302"),
+            },
+            "FE": {
+                "11:00–12:10": ("SAPM", "Dr. Rajbeer Kaur", "WB 5405"),
+                "12:20–1:30":  ("Principles of Banking", "Dr. Kavita Berwal / Prof. Rachna Kathuria", "WB 5405"),
+            },
+            "DM": {
+                "11:00–12:10": ("Digital Marketing Analytics", "Prof. Sonal Gulati", "KB 102"),
+                "12:20–1:30":  ("Strategic Social Media Marketing", "Prof. Sonal Gulati", "KB 102"),
+            },
+            "HR2": {
+                "11:00–12:10": ("Performance Management System", "Prof. Parveen Kaur", "WB 5501"),
+                "12:20–1:30":  ("Talent Acquisition", "Dr. Aaqib Danish", "WB 5501"),
+            },
+            "FAIM": {
+                "11:00–12:10": ("Alternative Assets & Private Equity", "Dr. Geetika Batra", "WB 5502"),
+                "12:20–1:30":  ("Foundation of Financial Data Science", "Dr. Pushpa Negi", "WB 5502"),
+            },
+            "OPR-A": {
+                "11:00–12:10": ("Operations Research & Application", "Dr. MKP Naik", "KB 303"),
+                "12:20–1:30":  ("Management of Service Operations", "Dr. Uday Sankar", "KB 303"),
+            },
+            "OPR-B": {
+                "11:00–12:10": ("Management of Service Operations", "Dr. Uday Sankar", "KB 6500"),
+                "12:20–1:30":  ("Operations Research & Application", "Dr. MKP Naik", "KB 6500"),
+            },
+        },
+        "Saturday (07 Mar)": {
+            "FE": {
+                "9:40–10:55": ("FMS", "Dr. Haseen / Dr. Chand Tandon", "WB 5405"),
+            },
+            "MA": {
+                "11:05–12:20": ("Basics of Project Management", "Dr. Ashish Yadav (2:20–4:20)", "WB 5501"),
+                "12:30–1:45":  ("Basics of Project Management (contd.)", "Dr. Ashish Yadav", "WB 5501"),
+                "2:20–3:35":   ("Research Methodology", "Dr. S S Khullar", "WB 5501"),
+            },
+            "MB": {
+                "11:05–12:20": ("Digital Marketing Social Media", "Prof. Kunal Jha", "WB 5502"),
+                "12:30–1:45":  ("Economic Environment of Business", "Dr. Charu Tayal", "WB 5502"),
+                "2:20–3:35":   ("HRM", "Dr. Tanveer Shah", "WB 5502"),
+            },
+            "MC": {
+                "11:05–12:20": ("Economic Environment of Business", "Dr. Zeeshan", "WB 5503"),
+                "12:30–1:45":  ("Economic Environment of Business", "Dr. Zeeshan", "WB 5503"),
+            },
+            "MD": {
+                "12:30–1:45":  ("CSD-2", "Dr. Jyoti Kukreja / Dr. Samriti Mahajan", "WB 5505"),
+            },
+            "ME": {
+                "11:05–12:20": ("Research Methodology", "Dr. Anuj Nain", "WB 5601"),
+                "12:30–1:45":  ("Digital Marketing Social Media", "Prof. Kunal Jha", "WB 5601"),
+            },
+            "FA": {
+                "11:05–12:20": ("Aptitude", "Prof. Atul Rawat", "WB 5401"),
+                "12:30–1:45":  ("—", "—", "—"),
+            },
+            "FB": {
+                "11:05–12:20": ("Basics of Project Management", "Dr. MKP Naik (11:05–12:05)", "WB 5402"),
+                "12:30–1:45":  ("Basics of Project Management (contd.)", "Dr. MKP Naik", "WB 5402"),
+                "2:20–3:35":   ("Basics of Project Management", "Dr. Uday Sankar (2:20–4:20)", "WB 5402"),
+            },
+            "FC": {
+                "11:05–12:20": ("Research Methodology", "Dr. Mohd. Azhar / Dr. Anuj Nain", "WB 5403"),
+                "12:30–1:45":  ("Research Methodology", "Dr. Mohd. Azhar / Dr. Anuj Nain", "WB 5403"),
+            },
+            "FD": {
+                "11:05–12:20": ("Economic Environment of Business", "Dr. Zeeshan", "WB 5405"),
+                "12:30–1:45":  ("Aptitude", "Prof. Atul Rawat", "WB 5405"),
+            },
+        },
+    }
+
+    # ── Section selector ──────────────────────────────────────
+    all_sections = sorted({
+        sec
+        for day_data in TT.values()
+        for sec in day_data.keys()
+        if sec != "ALL SECTIONS"
+    })
+
+    col_f1, col_f2 = st.columns([1, 3])
+    with col_f1:
+        selected_section = st.selectbox("🔍 Filter by Section", ["All Sections"] + all_sections)
+
+    st.markdown("<hr class='custom-divider'>", unsafe_allow_html=True)
+
+    days_order = ["Monday (02 Mar)", "Tuesday (03 Mar)", "Wednesday (04 Mar)",
+                  "Thursday (05 Mar)", "Friday (06 Mar)", "Saturday (07 Mar)"]
+
+    day_emoji = {
+        "Monday (02 Mar)":    "📅",
+        "Tuesday (03 Mar)":   "📅",
+        "Wednesday (04 Mar)": "🎨",
+        "Thursday (05 Mar)":  "📅",
+        "Friday (06 Mar)":    "📅",
+        "Saturday (07 Mar)":  "📅",
+    }
+
+    for day in days_order:
+        day_data = TT.get(day, {})
+        st.markdown(f"### {day_emoji[day]} {day}")
+
+        if "ALL SECTIONS" in day_data:
+            st.info("🎨 Holiday — Holi. No classes scheduled.")
+            st.markdown("<hr class='custom-divider'>", unsafe_allow_html=True)
+            continue
+
+        # Filter sections
+        sections_to_show = (
+            {k: v for k, v in day_data.items() if k == selected_section}
+            if selected_section != "All Sections"
+            else day_data
+        )
+
+        if not sections_to_show:
+            st.caption(f"No data for **{selected_section}** on this day.")
+            st.markdown("<hr class='custom-divider'>", unsafe_allow_html=True)
+            continue
+
+        for section, slots in sections_to_show.items():
+            with st.expander(f"📌 Section **{section}**", expanded=(selected_section != "All Sections")):
+                rows = []
+                for slot, (subj, prof, room) in slots.items():
+                    rows.append({"Time Slot": slot, "Subject": subj, "Professor": prof, "Room": room})
+                df_tt = pd.DataFrame(rows)
+                st.dataframe(df_tt, use_container_width=True, hide_index=True)
+
+        st.markdown("<hr class='custom-divider'>", unsafe_allow_html=True)
 
 
 # ── Landing page ──────────────────────────────────────────────
