@@ -418,7 +418,7 @@ def load_subjects() -> pd.DataFrame:
 
 @st.cache_data(ttl=1)
 def load_assignments() -> pd.DataFrame:
-    ASSIGNMENT_SHEET_GID = "0"   # ← replace with your Sheet 2 gid
+    ASSIGNMENT_SHEET_GID = "423288098"   # ← replace with your Sheet 2 gid
     base = "https://docs.google.com/spreadsheets/d/1MUynpz5LOdHVTsMSK5V4aP8bTCGLHRSy02peJn6XXbk/export?format=csv"
     try:
         df = pd.read_csv(f"{base}&gid={ASSIGNMENT_SHEET_GID}")
