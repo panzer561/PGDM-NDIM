@@ -230,19 +230,27 @@ def load_subjects() -> pd.DataFrame:
         return pd.DataFrame(columns=CORE_COLS)
 
 
-@st.cache_data(ttl=300)
+@st.cache_data(ttl=1)
 def load_assignments() -> pd.DataFrame:
     """
-    Sheet 2 (gid=1): Assignment-level data.
+    Sheet 2: Assignment-level data.
     Fixed columns : Subject, Assignment_No, Description, Deadline
     Extra columns : anything else (Comments, Marks, Links…) — shown dynamically
-    URL uses gid=1 for the second sheet tab.
+
+    To find your gid:
+      1. Open your Google Sheet
+      2. Click the second tab at the bottom
+      3. Look at the URL: ...#gid=XXXXXXXXX
+      4. Paste that number in ASSIGNMENT_SHEET_GID below
     """
-    assign_url = SHEET_URL.replace("export?format=csv", "export?format=csv&gid=1")
+    ASSIGNMENT_SHEET_GID = "423288098"   # ← REPLACE with your actual Sheet 2 gid
+
+    base = "https://docs.google.com/spreadsheets/d/1MUynpz5LOdHVTsMSK5V4aP8bTCGLHRSy02peJn6XXbk/export?format=csv"
+    assign_url = f"{base}&gid={ASSIGNMENT_SHEET_GID}"
+
     try:
         df = pd.read_csv(assign_url)
         df.columns = df.columns.str.strip()
-        # Normalise case for known columns
         known = ["Subject"] + ASSIGNMENT_FIXED_COLS
         col_map = {}
         for actual in df.columns:
