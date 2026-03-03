@@ -16,7 +16,7 @@ ASSIGNMENT_FIXED_COLS = ["Assignment_No", "Description", "Deadline"]
 # Any column beyond the above is treated as dynamic/extra
 
 st.set_page_config(
-    page_title="Student Academic Portal",
+    page_title="FC Student Portal",
     page_icon="🎓",
     layout="wide",
     initial_sidebar_state="collapsed",
