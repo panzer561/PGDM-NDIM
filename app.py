@@ -64,36 +64,36 @@ html, body, [class*="css"] { font-family: 'Segoe UI', sans-serif; }
 .usp-card p { margin: .4rem 0 0; font-size: .88rem; color: #444; font-weight: 500; }
 
 .section-label {
-    font-size: .75rem;
+    font-size: .7rem;
     font-weight: 700;
     letter-spacing: .08em;
     text-transform: uppercase;
-    color: #7b8ab8;
+    color: #64748b;
     margin-bottom: .3rem;
 }
 
 .filter-pill {
     display: inline-block;
-    background: #eef2ff;
-    border: 1px solid #c7d2fe;
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
     border-radius: 20px;
-    padding: .25rem .75rem;
-    font-size: .8rem;
-    color: #3730a3;
+    padding: .2rem .65rem;
+    font-size: .78rem;
+    color: #1e293b;
     margin: .2rem .2rem 0 0;
 }
 
 [data-testid="metric-container"] {
-    background: #f0f4ff;
-    border: 1px solid #d4dcfa;
-    border-radius: 12px;
-    padding: 1rem 1.2rem !important;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: .85rem 1rem !important;
 }
 
 .custom-divider {
     border: none;
-    border-top: 2px solid #e8ecf5;
-    margin: 1.5rem 0;
+    border-top: 1px solid #e2e8f0;
+    margin: 1.1rem 0;
 }
 
 /* Clickable assignment count badge */
@@ -101,93 +101,92 @@ html, body, [class*="css"] { font-family: 'Segoe UI', sans-serif; }
     display: inline-flex;
     align-items: center;
     gap: .45rem;
-    background: #1e293b;
-    color: #fff;
+    background: #0f172a;
+    color: #f1f5f9;
     border-radius: 999px;
-    padding: .35rem .9rem;
-    font-size: .95rem;
+    padding: .3rem .85rem;
+    font-size: .9rem;
     font-weight: 700;
     cursor: pointer;
     border: 2px solid transparent;
     transition: all .18s ease;
-    box-shadow: 0 2px 8px rgba(0,0,0,.15);
+    box-shadow: 0 2px 8px rgba(0,0,0,.12);
     user-select: none;
 }
 .count-badge:hover {
-    background: #3730a3;
-    border-color: #818cf8;
-    box-shadow: 0 4px 16px rgba(99,102,241,.35);
+    background: #2563eb;
+    border-color: #93c5fd;
+    box-shadow: 0 4px 16px rgba(37,99,235,.3);
     transform: translateY(-1px);
 }
-.count-badge .arrow { font-size: .75rem; opacity: .7; }
+.count-badge .arrow { font-size: .72rem; opacity: .65; }
 
 /* Assignment detail card */
 .assign-card {
-    background: #f8faff;
-    border: 1px solid #e0e7ff;
-    border-left: 4px solid #6366f1;
-    border-radius: 10px;
-    padding: .9rem 1.1rem;
-    margin-bottom: .65rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-left: 4px solid #2563eb;
+    border-radius: 8px;
+    padding: .8rem 1rem;
+    margin-bottom: .55rem;
 }
 .assign-card .assign-no {
-    font-size: .72rem;
+    font-size: .68rem;
     font-weight: 800;
     letter-spacing: .07em;
     text-transform: uppercase;
-    color: #6366f1;
-    margin-bottom: .3rem;
+    color: #2563eb;
+    margin-bottom: .25rem;
 }
 .assign-card .assign-desc {
-    font-size: .97rem;
+    font-size: .93rem;
     font-weight: 600;
-    color: #1e293b;
-    margin-bottom: .4rem;
+    color: #0f172a;
+    margin-bottom: .35rem;
 }
 .assign-meta {
     display: flex;
     flex-wrap: wrap;
-    gap: .5rem;
-    font-size: .8rem;
-    color: #64748b;
+    gap: .4rem;
+    font-size: .78rem;
 }
 .assign-meta span {
-    background: #e0e7ff;
-    color: #3730a3;
-    border-radius: 6px;
-    padding: .15rem .55rem;
+    background: #dbeafe;
+    color: #1d4ed8;
+    border-radius: 5px;
+    padding: .12rem .5rem;
 }
 .assign-meta .extra-key {
-    background: #f0fdf4;
-    color: #166534;
+    background: #dcfce7;
+    color: #15803d;
 }
 
 .disabled-box {
-    background: #f3f4f6;
-    border: 1px dashed #d1d5db;
+    background: #f1f5f9;
+    border: 1px dashed #cbd5e1;
     border-radius: 8px;
-    padding: .75rem 1rem;
-    color: #9ca3af;
-    font-size: .88rem;
+    padding: .65rem .9rem;
+    color: #94a3b8;
+    font-size: .83rem;
     text-align: center;
-    margin-top: 1.6rem;
+    margin-top: 1.55rem;
 }
 
 .no-data {
     text-align: center;
-    padding: 3rem 1rem;
-    color: #9ca3af;
-    font-size: 1rem;
+    padding: 2.5rem 1rem;
+    color: #94a3b8;
+    font-size: .95rem;
 }
 
 .error-box {
     background: #fef2f2;
     border-left: 4px solid #ef4444;
     border-radius: 8px;
-    padding: .75rem 1rem;
+    padding: .65rem .9rem;
     color: #991b1b;
-    font-size: .9rem;
-    margin-bottom: 1rem;
+    font-size: .87rem;
+    margin-bottom: .9rem;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -790,20 +789,6 @@ def landing_page(df: pd.DataFrame):
     with col4:
         st.markdown("<div class='disabled-box'>🔭 Section 2<br><small>Coming Soon</small></div>",
                     unsafe_allow_html=True)
-
-    st.markdown("<hr class='custom-divider'>", unsafe_allow_html=True)
-
-    # ── Quick links row ───────────────────────────────────────
-    st.markdown("<div class='section-label'>Quick Links</div>", unsafe_allow_html=True)
-    ql1, ql2, ql3 = st.columns([1, 1, 4])
-    with ql1:
-        st.link_button("📂 Previous Year Question Papers",
-                       "https://drive.google.com/drive/folders/1zTkxiZukKfBA3vpe0wS-iYFnqNrXME05?usp=sharing",
-                       use_container_width=True)
-    with ql2:
-        st.link_button("📅 Exam Date Sheet",
-                       "https://drive.google.com/file/d/1vs5ISXnOEeLodg1nrBQLLaSphDTuCLMv/view",
-                       use_container_width=True)
 
     st.markdown("<hr class='custom-divider'>", unsafe_allow_html=True)
 
