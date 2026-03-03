@@ -16,7 +16,7 @@ ASSIGNMENT_FIXED_COLS = ["Assignment_No", "Description", "Deadline"]
 # Any column beyond the above is treated as dynamic/extra
 
 st.set_page_config(
-    page_title="FC Student Portal",
+    page_title="Student Academic Portal",
     page_icon="🎓",
     layout="wide",
     initial_sidebar_state="collapsed",
@@ -751,7 +751,7 @@ def show_timetable_page():
 def landing_page(df: pd.DataFrame):
     st.markdown("""
     <div class="hero">
-        <h1>🎓 FC Student Portal</h1>
+        <h1>🎓 Student Academic Portal</h1>
         <p>Your one-stop dashboard to track assignments, deadlines &amp; workload</p>
     </div>
     """, unsafe_allow_html=True)
@@ -770,25 +770,22 @@ def landing_page(df: pd.DataFrame):
     st.markdown("<div class='section-label'>Select Your Profile</div>", unsafe_allow_html=True)
     col1, col2, col3, col4 = st.columns(4)
 
-    batches = sorted(df["Batch"].dropna().unique().tolist()) if not df.empty else []
-    with col1:
-        batch = st.selectbox("🗓 Batch", ["— Select —"] + batches, key="sel_batch")
+    # Fixed values
+    FIXED_BATCH  = "2025-27"
+    FIXED_COURSE = "PGDM"
 
-    courses = (
-        sorted(df[df["Batch"] == batch]["Course"].dropna().unique().tolist())
-        if batch != "— Select —" else []
-    )
+    with col1:
+        st.selectbox("🗓 Batch", [FIXED_BATCH], disabled=True, key="sel_batch")
+
     with col2:
-        course = st.selectbox("📘 Course", ["— Select —"] + courses,
-                              key="sel_course", disabled=(batch == "— Select —"))
+        st.selectbox("📘 Course", [FIXED_COURSE], disabled=True, key="sel_course")
 
     sections = (
-        sorted(df[(df["Batch"] == batch) & (df["Course"] == course)]["Section"].dropna().unique().tolist())
-        if (batch != "— Select —" and course != "— Select —") else []
+        sorted(df[(df["Batch"] == FIXED_BATCH) & (df["Course"] == FIXED_COURSE)]["Section"].dropna().unique().tolist())
+        if not df.empty else []
     )
     with col3:
-        section1 = st.selectbox("🔬 Section 1", ["— Select —"] + sections,
-                                key="sel_section1", disabled=(course == "— Select —"))
+        section1 = st.selectbox("🔬 Section 1", ["— Select —"] + sections, key="sel_section1")
 
     with col4:
         st.markdown("<div class='disabled-box'>🔭 Section 2<br><small>Coming Soon</small></div>",
@@ -796,13 +793,27 @@ def landing_page(df: pd.DataFrame):
 
     st.markdown("<hr class='custom-divider'>", unsafe_allow_html=True)
 
-    all_selected = all(v != "— Select —" for v in [batch, course, section1])
+    # ── Quick links row ───────────────────────────────────────
+    st.markdown("<div class='section-label'>Quick Links</div>", unsafe_allow_html=True)
+    ql1, ql2, ql3 = st.columns([1, 1, 4])
+    with ql1:
+        st.link_button("📂 Previous Year Question Papers",
+                       "https://drive.google.com/drive/folders/1zTkxiZukKfBA3vpe0wS-iYFnqNrXME05?usp=sharing",
+                       use_container_width=True)
+    with ql2:
+        st.link_button("📅 Exam Date Sheet",
+                       "https://drive.google.com/file/d/1vs5ISXnOEeLodg1nrBQLLaSphDTuCLMv/view",
+                       use_container_width=True)
+
+    st.markdown("<hr class='custom-divider'>", unsafe_allow_html=True)
+
+    all_selected = section1 != "— Select —"
     if not all_selected:
-        st.caption("ℹ️ Please select Batch, Course, and Section 1 to continue.")
+        st.caption("ℹ️ Please select your Section to continue.")
 
     if st.button("Continue to Subjects →", disabled=not all_selected, type="primary"):
-        st.session_state.batch   = batch
-        st.session_state.course  = course
+        st.session_state.batch   = FIXED_BATCH
+        st.session_state.course  = FIXED_COURSE
         st.session_state.section = section1
         st.session_state.page    = "subjects"
         st.rerun()
