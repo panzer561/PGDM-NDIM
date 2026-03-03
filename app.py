@@ -15,6 +15,22 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
+st.markdown("""
+<style>
+/* Hide Streamlit top right menu */
+#MainMenu {visibility: hidden;}
+
+/* Hide footer */
+footer {visibility: hidden;}
+
+/* Hide header */
+header {visibility: hidden;}
+
+/* Hide deploy button & GitHub link */
+[data-testid="stToolbar"] {display: none !important;}
+</style>
+""", unsafe_allow_html=True)
+
 # ── Global CSS ───────────────────────────────────────────────
 st.markdown("""
 <style>
