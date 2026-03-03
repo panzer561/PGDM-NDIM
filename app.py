@@ -767,12 +767,6 @@ def landing_page(df: pd.DataFrame):
 
     st.markdown("<hr class='custom-divider'>", unsafe_allow_html=True)
 
-    _, tt_col = st.columns([6, 1])
-    with tt_col:
-        if st.button("📅 View Timetable", use_container_width=True):
-            st.session_state.page = "timetable"
-            st.rerun()
-
     st.markdown("<div class='section-label'>Select Your Profile</div>", unsafe_allow_html=True)
     col1, col2, col3, col4 = st.columns(4)
 
@@ -871,7 +865,7 @@ def subjects_page(df_subjects: pd.DataFrame, df_assignments: pd.DataFrame):
         prof    = row["Professor"]
 
         # ── Level 1 expander: subject row ─────────────────────
-        expander_label = f"{emoji}  {subject}  —  👨‍🏫 {prof}"
+        expander_label = f"{emoji}  {subject}  —  {prof}"
         with st.expander(expander_label, expanded=False):
 
             # Clickable-looking count badge + hint text
@@ -956,9 +950,7 @@ def main():
         st.stop()
 
     page = st.session_state.page
-    if page == "timetable":
-        show_timetable_page()
-    elif page == "subjects":
+    if page == "subjects":
         subjects_page(df_subjects, df_assignments)
     else:
         landing_page(df_subjects)
