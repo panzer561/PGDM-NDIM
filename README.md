@@ -1,0 +1,2 @@
+# PGDM-NDIM
+Academic Portal
